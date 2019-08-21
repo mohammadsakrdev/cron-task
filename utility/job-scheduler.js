@@ -8,6 +8,10 @@ const renameAsync = promisify(rename);
 
 /**
  * Firing Corn job to move files from one folder to another one
+ *
+ * @function
+ *
+ * @return {undefined}
  */
 module.exports = () => {
   // schedule tasks to be run on the server

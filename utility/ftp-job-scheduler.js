@@ -2,10 +2,9 @@ const cron = require('node-cron');
 const path = require('path');
 const { readdir, writeFile, rename, open, close } = require('fs');
 const { promisify } = require('util');
-const moveFile = require('move-file');
 
 const readDirectory = promisify(readdir);
-const renameAsync = promisify(rename);
+const chilkat = require('@chilkat/ck-node11-linux64');
 
 /**
  * Firing Corn job to move files from one folder to another one
@@ -46,22 +45,29 @@ module.exports = () => {
         } else {
           close(fileToMove, async () => {
             // remove function with old file, newFile and callback function
-            await renameAsync(moveFrom, moveTo, err => {
-              if (err) {
-                console.error(err);
-                return;
-              }
-              console.log(`File ${file} Moving complete!`);
-            });
-            // Second choice
-            // await moveFile(moveFrom, moveTo)
-            //   .then(result => {
-            //     console.log('The file has been moved');
-            //   })
-            //   .catch(err => {
-            //     console.error(err);
-            //     return;
-            //   });
+            // This example requires the Chilkat API to have been previously unlocked.
+
+            const ftp = new chilkat.Ftp2();
+
+            ftp.Hostname = Process.env.HOST_NAME;
+            ftp.Username = Process.env.USER_NAME;
+            ftp.Password = Process.env.PASSWORD;
+
+            // Connect and login to the FTP server.
+            const success = ftp.Connect();
+            if (success !== true) {
+              console.log(ftp.LastErrorText);
+              return;
+            }
+
+            // Rename the remote file (or directory)
+            success = ftp.RenameRemoteFile(moveFrom, moveTo);
+            if (success !== true) {
+              console.log(ftp.LastErrorText);
+              return;
+            }
+
+            success = ftp.Disconnect();
           });
         }
       });

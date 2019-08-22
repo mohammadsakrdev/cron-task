@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js",
-    "start-server": "node app.js"
+    "start-server": "pm2 start app.js"
   },
   "repository": {
     "type": "git",
@@ -19,14 +19,17 @@
   },
   "homepage": "https://github.com/mohammadsakrdev/cron-task#readme",
   "dependencies": {
+    "@chilkat/ck-node11-linux64": "^9.50.79",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.1.0",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "helmet": "^3.20.0",
+    "move-file": "^1.2.0",
     "node-cron": "^2.0.3",
     "nodemon": "^1.19.1",
+    "pm2": "^3.5.1",
     "util": "^0.12.1"
   }
 }

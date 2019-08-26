@@ -17,27 +17,29 @@ const renameAsync = promisify(rename);
 module.exports = () => {
   // schedule tasks to be run on the server
   cron.schedule('*/5 * * * * *', async () => {
-    const current = new Date().toISOString();
+    const directoryPathToMoveFrom = process.env.DIRECTORY_TO_MOVE_FROM;
+    const current = new Date().toISOString().replace(':', '-');
     console.log(`Running a task every 5 seconds, time now ${current}`);
     // writeFile function with filename, content and callback function
-    // writeFile(
-    //   `old/${current}.txt`,
-    //   `This file is created at ${current}`,
-    //   err => {
-    //     if (err) {
-    //       console.error(err);
-    //     }
-    //     console.log(`File ${current} is created successfully.`);
-    //   }
-    // );
-    const directoryPathToMoveFrom =
-      process.env.DIRECTORY_TO_MOVE_FROM || path.join('old');
+    writeFile(
+      path.normalize(path.join(directoryPathToMoveFrom, `${current}.txt`)),
+      `This file is created at ${current}`,
+      err => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(`File ${current} is created successfully.`);
+        }
+      }
+    );
     const files = await readDirectory(directoryPathToMoveFrom);
 
     files.forEach(async file => {
       // check if file is open for editing by another process
-      const moveFrom = path.join(directoryPathToMoveFrom, file);
-      const moveTo = path.join(process.env.DIRECTORY_TO_MOVE_TO, file);
+      const moveFrom = path.normalize(path.join(directoryPathToMoveFrom, file));
+      const moveTo = path.normalize(
+        path.join(process.env.DIRECTORY_TO_MOVE_TO, file)
+      );
       open(moveFrom, 'r+', async (err, fileToMove) => {
         if (err && (err.code === 'EBUSY' || err.code === 'ENOENT')) {
           //do nothing till next loop
@@ -46,22 +48,22 @@ module.exports = () => {
         } else {
           close(fileToMove, async () => {
             // remove function with old file, newFile and callback function
-            await renameAsync(moveFrom, moveTo, err => {
-              if (err) {
-                console.error(err);
-                return;
-              }
-              console.log(`File ${file} Moving complete!`);
-            });
-            // Second choice
-            // await moveFile(moveFrom, moveTo)
-            //   .then(result => {
-            //     console.log('The file has been moved');
-            //   })
-            //   .catch(err => {
+            // await renameAsync(moveFrom, moveTo, err => {
+            //   if (err) {
             //     console.error(err);
             //     return;
-            //   });
+            //   }
+            //   console.log(`File ${file} Moving complete!`);
+            // });
+            // Second choice
+            await moveFile(moveFrom, moveTo)
+              .then(result => {
+                console.log('The file has been moved');
+              })
+              .catch(err => {
+                console.error(err);
+                return;
+              });
           });
         }
       });

@@ -4,8 +4,8 @@ const { readdir, writeFile, rename, open, close } = require('fs');
 const { promisify } = require('util');
 
 const readDirectory = promisify(readdir);
-const chilkat = require('@chilkat/ck-node11-linux64');
-// const chilkat = require('@chilkat/ck-node11-win64')
+// const chilkat = require('@chilkat/ck-node11-linux64');
+const chilkat = require('@chilkat/ck-node11-win64');
 
 /**
  * Firing Corn job to move files from one folder to another one
@@ -20,16 +20,16 @@ module.exports = () => {
     const current = new Date().toISOString();
     console.log(`Running a task every 5 seconds, time now ${current}`);
     // writeFile function with filename, content and callback function
-    // writeFile(
-    //   `old/${current}.txt`,
-    //   `This file is created at ${current}`,
-    //   err => {
-    //     if (err) {
-    //       console.error(err);
-    //     }
-    //     console.log(`File ${current} is created successfully.`);
-    //   }
-    // );
+    writeFile(
+      `old/${current}.txt`,
+      `This file is created at ${current}`,
+      err => {
+        if (err) {
+          console.error(err);
+        }
+        console.log(`File ${current} is created successfully.`);
+      }
+    );
     const directoryPathToMoveFrom =
       process.env.DIRECTORY_TO_MOVE_FROM || path.join('old');
     const files = await readDirectory(directoryPathToMoveFrom);
@@ -50,9 +50,9 @@ module.exports = () => {
 
             const sftp = new chilkat.SFtp();
 
-            let success = sftp.Connect('my-ssh-server.com', 22);
+            let success = sftp.Connect('54.93.69.181', 22);
             if (success == true) {
-              success = sftp.AuthenticatePw('mySshLogin', 'mySshPassword');
+              success = sftp.AuthenticatePw('root', 'cl0ud24418WED');
             }
 
             if (success == true) {
@@ -88,15 +88,19 @@ module.exports = () => {
             // This example turns on recursion to synchronize the entire tree.
             // Recursion can be turned off to synchronize the files of a single directory.
             const recursive = true;
-            success = sftp.SyncTreeUpload(localDir, remoteDir, mode, recursive);
+            // success = sftp.SyncTreeUpload(localDir, remoteDir, mode, recursive);
+            success = sftp.SyncTreeUpload(
+              localDir,
+              '/home/lyticshub/Field_Logs/Test',
+              mode,
+              recursive
+            );
             if (success !== true) {
               console.log(sftp.LastErrorText);
               return;
             }
 
             console.log('Success.');
-
-            success = ftp.Disconnect();
           });
         }
       });

@@ -4,7 +4,7 @@ const { readdir, writeFile, rename, open, close } = require('fs');
 const { promisify } = require('util');
 
 const readDirectory = promisify(readdir);
-const chilkat = require('@chilkat/ck-node11-linux64');
+const chilkat = require('@chilkat/ck-node10-linux64');
 
 /**
  * Firing Corn job to move files from one folder to another one
@@ -16,21 +16,21 @@ const chilkat = require('@chilkat/ck-node11-linux64');
 module.exports = () => {
   // schedule tasks to be run on the server
   cron.schedule('*/5 * * * * *', async () => {
-    const current = new Date().toISOString();
+    const current = new Date().toISOString().replace(':', '-');
+    const directoryPathToMoveFrom = process.env.DIRECTORY_TO_MOVE_FROM;
     console.log(`Running a task every 5 seconds, time now ${current}`);
     // writeFile function with filename, content and callback function
     // writeFile(
-    //   `old/${current}.txt`,
+    //   path.normalize(path.join(directoryPathToMoveFrom, `${current}.txt`)),
     //   `This file is created at ${current}`,
     //   err => {
     //     if (err) {
     //       console.error(err);
+    //     } else {
+    //       console.log(`File ${current} is created successfully.`);
     //     }
-    //     console.log(`File ${current} is created successfully.`);
     //   }
     // );
-    const directoryPathToMoveFrom =
-      process.env.DIRECTORY_TO_MOVE_FROM || path.join('old');
     const files = await readDirectory(directoryPathToMoveFrom);
 
     files.forEach(async file => {
@@ -49,12 +49,13 @@ module.exports = () => {
 
             const ftp = new chilkat.Ftp2();
 
-            ftp.Hostname = Process.env.HOST_NAME;
-            ftp.Username = Process.env.USER_NAME;
-            ftp.Password = Process.env.PASSWORD;
+            ftp.Hostname = process.env.HOST_NAME;
+            ftp.Username = process.env.USER_NAME;
+            ftp.Password = process.env.PASSWORD;
+            ftp.Port = 21;
 
             // Connect and login to the FTP server.
-            const success = ftp.Connect();
+            let success = ftp.Connect();
             if (success !== true) {
               console.log(ftp.LastErrorText);
               return;

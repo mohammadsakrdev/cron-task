@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const cors = require('cors');
-const jobScheduler = require('./utility/job-scheduler');
+const jobScheduler = require('./utility/jsftp');
 
 app = express();
 app.use(bodyParser.json());
@@ -12,6 +12,7 @@ app.use(
     extended: false
   })
 );
+
 app.use(cors());
 app.use(helmet());
 
